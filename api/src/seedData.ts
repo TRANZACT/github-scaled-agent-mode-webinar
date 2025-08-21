@@ -6,6 +6,8 @@ import { Order } from './models/order';
 import { OrderDetail } from './models/orderDetail';
 import { Delivery } from './models/delivery';
 import { OrderDetailDelivery } from './models/orderDetailDelivery';
+import { Cart } from './models/cart';
+import { CartItem } from './models/cartItem';
 
 // Suppliers
 export const suppliers: Supplier[] = [
@@ -291,4 +293,21 @@ export const orderDetailDeliveries: OrderDetailDelivery[] = [
         quantity: 20,
         notes: "Delivery"
     }
+];
+
+// Carts
+export const carts: Cart[] = [
+    {
+        cartId: 1,
+        userId: "user1",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        status: 'active',
+        totalAmount: 0 // Will be calculated dynamically
+    }
+];
+
+// Cart Items
+export const cartItems: CartItem[] = [
+    // Empty initially - items will be added through the API
 ];

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useQuery } from 'react-query';
 import { api } from '../../../api/config';
 import { useTheme } from '../../../context/ThemeContext';
+import { useCart } from '../../../context/CartContext';
 
 interface Product {
   productId: number;
@@ -28,6 +29,7 @@ export default function Products() {
   const [showModal, setShowModal] = useState(false);
   const { data: products, isLoading, error } = useQuery('products', fetchProducts);
   const { darkMode } = useTheme();
+  const { addToCart, isLoading: cartLoading } = useCart();
 
   const filteredProducts = products?.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -41,15 +43,21 @@ export default function Products() {
     }));
   };
 
-  const handleAddToCart = (productId: number) => {
+  const handleAddToCart = async (productId: number) => {
     const quantity = quantities[productId] || 0;
     if (quantity > 0) {
-      // TODO: Implement cart functionality
-      alert(`Added ${quantity} items to cart`);
-      setQuantities(prev => ({
-        ...prev,
-        [productId]: 0
-      }));
+      try {
+        await addToCart(productId, quantity);
+        // Reset quantity to 0 after successful add
+        setQuantities(prev => ({
+          ...prev,
+          [productId]: 0
+        }));
+        // You could add a success message here
+      } catch (err) {
+        console.error('Failed to add to cart:', err);
+        // Error handling is done in the cart context
+      }
     }
   };
 
@@ -171,15 +179,15 @@ export default function Products() {
                       <button 
                         onClick={() => handleAddToCart(product.productId)}
                         className={`px-4 py-2 rounded-lg transition-colors ${
-                          quantities[product.productId] 
+                          quantities[product.productId] && !cartLoading
                             ? 'bg-primary hover:bg-accent text-white' 
                             : `${darkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'} cursor-not-allowed`
                         }`}
-                        disabled={!quantities[product.productId]}
+                        disabled={!quantities[product.productId] || cartLoading}
                         aria-label={`Add ${quantities[product.productId] || 0} ${product.name} to cart`}
                         id={`add-to-cart-${product.productId}`}
                       >
-                        Add to Cart
+                        {cartLoading ? 'Adding...' : 'Add to Cart'}
                       </button>
                     </div>
                   </div>
